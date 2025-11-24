@@ -1,0 +1,42 @@
+Load an image from disk.
+Convert the image to grayscale.
+Apply Gaussian blur to the grayscale image.
+Detect edges using the Canny edge detection algorithm.
+Display the original image, grayscale image, blurred image, and edge-detected image side-by-side using matplotlib.
+Write a program to load an image and display it using OpenCV or Matplotlib.
+Convert a color image to grayscale and display both the original and grayscale images.
+Write a Python program to resize an image to half or double its original dimensions.
+Apply Gaussian Blur to an image and compare the original and blurred versions.
+Use Canny edge detection to highlight the edges in an image.
+Apply binary thresholding to convert a grayscale image into black-and-white.
+Write a program to rotate an image 90 degrees or flip it horizontally/vertically.
+Write a program to draw rectangles, circles, and text on an image.
+Convert an image from BGR to RGB color spaces.
+write python code to take from no 1200 out of a video.
+write python code to detect edges of a video.
+write python code to to convert a video in to gray scale video.
+Write a Python program to capture a single frame from your webcam and save it as an image.
+Load a video from disk and display its frames one by one using OpenCV.
+Extract every 30th frame from a video and save them as individual image files.
+Write a Python script to convert a video to grayscale and save the output as a new video file.
+Apply a sepia filter to an image and display the original and filtered image side-by-side.
+Write a program to apply a median filter to an image and observe noise reduction.
+Crop a region of interest (ROI) from an image and save it separately.
+Write a Python script to draw a bounding box around detected edges in an image.
+Load two images and blend them using cv2.addWeighted() to create a transparency effect.
+Overlay one image onto another using masking techniques.
+Write code to detect contours in a binary image and draw them.
+Implement adaptive thresholding on a grayscale image using OpenCV.
+Capture video from webcam and apply real-time Canny edge detection.
+Apply morphological operations (erosion and dilation) to remove noise from a binary image.
+Detect and highlight corners in an image using the Harris corner detection method.
+Convert an image from RGB to HSV and isolate a specific color range (e.g., red).
+Track an object of a particular color in a live webcam feed using HSV color space.
+Display the histogram of a grayscale Image using matplotlib.
+Apply histogram equalization to enhance the contrast of a grayscale Image.
+Write a Python program to detect and count the number of faces in an Image using Haar cascades.
+Write a Python script to detect and blur faces in an Image using Haar cascades.
+Create a real-time background subtraction program using live webcam feed (e.g., using cv2.createBackgroundSubtractorMOG2).
+Write code to detect straight lines in an Image using the Hough Line Transform.
+Implement real-time motion detection using frame differencing in a video stream.
+Write a Python program to detect circles in an Image using the Hough Circle Transform.

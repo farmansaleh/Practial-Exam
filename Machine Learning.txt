@@ -1,0 +1,40 @@
+Write a program to demonstrate the working of the decision tree-based ID3 algorithm.
+Build an Artificial Neural Network by implementing the Backpropagation algorithm and test the same using appropriate data sets.
+WAP to implement Logistic Regression - A classification algorithm used to predict binary outcomes (e.g., spam or not spam).
+Write a program to construct a Bayesian network considering medical data. Use this model to demonstrate the diagnosis of heart patients using standard Heart Disease Data Set
+Write a program to implement the K-Nearest Neighbour algorithm to classify the iris data set
+Implement linear regression and logistic regression
+Compare the various Unsupervised learning algorithm by using the appropriate datasets
+House Price Prediction (Regression) Predict house prices based on factors like square footage, number of rooms, and location.
+Customer Churn Prediction (Classification) Determine whether a customer is likely to stop using a service based on their usage behavior.
+Spam Email Detection (Classification) Classify emails as spam or not based on their content and metadata.
+Analyze customer reviews to classify them as positive, negative, or neutral.
+Identify handwritten digits from images, such as those in postal code recognition.
+Customer Segmentation (Clustering) Group customers into segments based on purchasing behavior and demographics.
+Stock Price Prediction (Time Series Forecasting) Predict future stock prices using historical market data.
+Fake News Detection (Classification) Determine whether a news article is real or fake based on its content.
+Medical Diagnosis (Classification) Predict whether a patient has a disease based on medical test results.
+Recommender System (Recommendation) Suggest products, movies, or books based on user preferences and past interactions.
+WAP to Implement Decision Tree Classifier - A tree-based model that splits data based on feature values to make predictions.
+WAP to Implement Support Vector Machine (SVM)-A classification algorithm that finds an optimal hyperplane for separating different classes.
+WAP to Implement Random Forest Classifier-An ensemble learning method that builds multiple decision trees and merges their outputs.
+WAP to Implement Artificial Neural Network (ANN)-A deep learning model with multiple layers of neurons used for complex tasks.
+WAP to Implement Convolutional Neural Network (CNN)-A neural network designed for image classification and recognition.
+WAP to implement Recurrent. Neural Network (RNN)-A neural network useful for sequential data like time series or natural language processing.
+WAP to Implement LSTM (Long Short-Term Memory) - A type of RNN used for time-series forecasting and text generation.
+WAP to implement Gradient Boosting (XGBoost, LightGBM, CatBoost) - An ensemble technique that improves weak models through gradient optimization.
+WAP to Implement Reinforcement Learning with Q-Learning-A learning approach where an agent learns optimal actions through rewards and penalties.
+WAP to Implement Natural Language Processing (NLP) with SpaCy -A program that processes and analyzes text using pre-trained models.
+WAP to Implement Sentiment Analysis with NLP-A machine learning model that classifies text sentiment as positive, negative, or neutral,
+WAP to Implement AutoML with TPOT-A program that automates machine learning model selection and hyperparameter tuning.
+WAP to Implement Anomaly Detection with Isolation Forest-A program that detects outliers in data by isolating anomalies using tree-based structures.
+WAP to Print 149 16 25 using Class and Object.
+WAP to Demostrate the usage of Inheritance in Python.
+WAP to Demostrate the usage of Constructor and Constructor Overloading Python
+WAP to Demostrate the usage of Function and Function Overloading in Python
+WAP to find maximum out of 3 using Class and Object in Python.
+WAP to Implement Principal Component Analysis (PCA)-A dimensionality reduction technique used to reduce the number of features while retaining key information.
+WAP to implement Naive Bayes Classifier - A probabilistic classifier based on Bayes' Theorem, commonly used for text classification.
+WAP to implement Hierarchical Clustering - A clustering algorithm that builds a hierarchy of clusters through successive merging or splitting.
+WAP to implement LSTM (Long Short-Term Memory) - A type of RNN used for time-series forecasting and text generation.
+WAP to implement Principal Component Analysis (PCA) - A dimensionality reduction technique used to reduce the number of features while retaining key information.
