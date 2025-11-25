@@ -1,40 +1,794 @@
-Write a program to demonstrate the working of the decision tree-based ID3 algorithm.
-Build an Artificial Neural Network by implementing the Backpropagation algorithm and test the same using appropriate data sets.
-WAP to implement Logistic Regression - A classification algorithm used to predict binary outcomes (e.g., spam or not spam).
-Write a program to construct a Bayesian network considering medical data. Use this model to demonstrate the diagnosis of heart patients using standard Heart Disease Data Set
-Write a program to implement the K-Nearest Neighbour algorithm to classify the iris data set
-Implement linear regression and logistic regression
-Compare the various Unsupervised learning algorithm by using the appropriate datasets
-House Price Prediction (Regression) Predict house prices based on factors like square footage, number of rooms, and location.
-Customer Churn Prediction (Classification) Determine whether a customer is likely to stop using a service based on their usage behavior.
-Spam Email Detection (Classification) Classify emails as spam or not based on their content and metadata.
-Analyze customer reviews to classify them as positive, negative, or neutral.
-Identify handwritten digits from images, such as those in postal code recognition.
-Customer Segmentation (Clustering) Group customers into segments based on purchasing behavior and demographics.
-Stock Price Prediction (Time Series Forecasting) Predict future stock prices using historical market data.
-Fake News Detection (Classification) Determine whether a news article is real or fake based on its content.
-Medical Diagnosis (Classification) Predict whether a patient has a disease based on medical test results.
-Recommender System (Recommendation) Suggest products, movies, or books based on user preferences and past interactions.
-WAP to Implement Decision Tree Classifier - A tree-based model that splits data based on feature values to make predictions.
-WAP to Implement Support Vector Machine (SVM)-A classification algorithm that finds an optimal hyperplane for separating different classes.
-WAP to Implement Random Forest Classifier-An ensemble learning method that builds multiple decision trees and merges their outputs.
-WAP to Implement Artificial Neural Network (ANN)-A deep learning model with multiple layers of neurons used for complex tasks.
-WAP to Implement Convolutional Neural Network (CNN)-A neural network designed for image classification and recognition.
-WAP to implement Recurrent. Neural Network (RNN)-A neural network useful for sequential data like time series or natural language processing.
-WAP to Implement LSTM (Long Short-Term Memory) - A type of RNN used for time-series forecasting and text generation.
-WAP to implement Gradient Boosting (XGBoost, LightGBM, CatBoost) - An ensemble technique that improves weak models through gradient optimization.
-WAP to Implement Reinforcement Learning with Q-Learning-A learning approach where an agent learns optimal actions through rewards and penalties.
-WAP to Implement Natural Language Processing (NLP) with SpaCy -A program that processes and analyzes text using pre-trained models.
-WAP to Implement Sentiment Analysis with NLP-A machine learning model that classifies text sentiment as positive, negative, or neutral,
-WAP to Implement AutoML with TPOT-A program that automates machine learning model selection and hyperparameter tuning.
-WAP to Implement Anomaly Detection with Isolation Forest-A program that detects outliers in data by isolating anomalies using tree-based structures.
-WAP to Print 149 16 25 using Class and Object.
-WAP to Demostrate the usage of Inheritance in Python.
-WAP to Demostrate the usage of Constructor and Constructor Overloading Python
-WAP to Demostrate the usage of Function and Function Overloading in Python
-WAP to find maximum out of 3 using Class and Object in Python.
-WAP to Implement Principal Component Analysis (PCA)-A dimensionality reduction technique used to reduce the number of features while retaining key information.
-WAP to implement Naive Bayes Classifier - A probabilistic classifier based on Bayes' Theorem, commonly used for text classification.
-WAP to implement Hierarchical Clustering - A clustering algorithm that builds a hierarchy of clusters through successive merging or splitting.
-WAP to implement LSTM (Long Short-Term Memory) - A type of RNN used for time-series forecasting and text generation.
-WAP to implement Principal Component Analysis (PCA) - A dimensionality reduction technique used to reduce the number of features while retaining key information.
+Que. Write a program to demonstrate the working of the decision tree-based ID3 algorithm
+Ans.
+	import math
+	from collections import Counter
+
+	def entropy(data, target_attr):
+		values = [row[target_attr] for row in data]
+		value_counts = Counter(values)
+
+		ent = 0.0
+		for count in value_counts.values():
+			probability = count / len(data)
+			ent -= probability * math.log2(probability)
+		return ent
+
+	def information_gain(data, attr, target_attr):
+		total_entropy = entropy(data, target_attr)
+
+		values = set([row[attr] for row in data])
+
+		weighted_entropy = 0.0
+		for v in values:
+			subset = [row for row in data if row[attr] == v]
+			weighted_entropy += (len(subset) / len(data)) * entropy(subset, target_attr)
+
+		return total_entropy - weighted_entropy
+
+	def id3(data, attributes, target_attr):
+		labels = [row[target_attr] for row in data]
+
+		if labels.count(labels[0]) == len(labels):
+			return labels[0]
+
+		if not attributes:
+			return Counter(labels).most_common(1)[0][0]
+
+		gains = {attr: information_gain(data, attr, target_attr) for attr in attributes}
+		best_attr = max(gains, key=gains.get)
+
+		tree = {best_attr: {}}
+
+		values = set([row[best_attr] for row in data])
+
+		for v in values:
+			subset = [row for row in data if row[best_attr] == v]
+
+			new_attrs = [a for a in attributes if a != best_attr]
+
+			subtree = id3(subset, new_attrs, target_attr)
+			tree[best_attr][v] = subtree
+
+		return tree
+
+
+	# ---------------------------------------------------------
+	# Example Dataset (Play Tennis)
+	# ---------------------------------------------------------
+	dataset = [
+		{"Outlook": "Sunny",  "Humidity": "High",   "Wind": "Weak",   "Play": "No"},
+		{"Outlook": "Sunny",  "Humidity": "High",   "Wind": "Strong", "Play": "No"},
+		{"Outlook": "Overcast","Humidity": "High",  "Wind": "Weak",   "Play": "Yes"},
+		{"Outlook": "Rain",   "Humidity": "High",   "Wind": "Weak",   "Play": "Yes"},
+		{"Outlook": "Rain",   "Humidity": "Normal", "Wind": "Weak",   "Play": "Yes"},
+		{"Outlook": "Overcast","Humidity": "Normal","Wind": "Strong", "Play": "Yes"},
+		{"Outlook": "Sunny",  "Humidity": "Normal", "Wind": "Weak",   "Play": "Yes"},
+		{"Outlook": "Sunny",  "Humidity": "Normal", "Wind": "Strong", "Play": "Yes"},
+		{"Outlook": "Rain",   "Humidity": "Normal", "Wind": "Strong", "Play": "No"}
+	]
+
+	attributes = ["Outlook", "Humidity", "Wind"]
+	target = "Play"
+
+	# Build the decision tree
+	tree = id3(dataset, attributes, target)
+
+	# Print the final decision tree
+	print("Decision Tree generated using ID3 algorithm:")
+	print(tree)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Write a program to implement the K-Nearest Neighbour algorithm to classify the iris data set
+Ans. 
+	import numpy as np
+	from sklearn.datasets import load_iris
+	from sklearn.model_selection import train_test_split
+	from collections import Counter
+
+	def euclidean_distance(x1, x2):
+		return np.sqrt(np.sum((x1 - x2) ** 2))
+
+	class KNN:
+		def __init__(self, k=3):
+			self.k = k
+
+		def fit(self, X, y):
+			self.X_train = X
+			self.y_train = y
+
+		def predict_one(self, x):
+			distances = [euclidean_distance(x, x_train) for x_train in self.X_train]
+
+			k_indices = np.argsort(distances)[:self.k]
+
+			k_nearest_labels = [self.y_train[i] for i in k_indices]
+			most_common = Counter(k_nearest_labels).most_common(1)[0][0]
+			return most_common
+
+		def predict(self, X):
+			return np.array([self.predict_one(x) for x in X])
+
+	iris = load_iris()
+	X = iris.data
+	y = iris.target
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+	knn = KNN(k=3)
+	knn.fit(X_train, y_train)
+
+	predictions = knn.predict(X_test)
+
+	accuracy = np.mean(predictions == y_test)
+
+	print("Predicted labels:", predictions)
+	print("Actual labels:   ", y_test)
+	print("Accuracy of KNN classifier:", accuracy)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Implement linear regression and logistic regression
+Ans.
+	import numpy as np
+
+	class LinearRegressionGD:
+		def __init__(self, learning_rate=0.01, n_iters=1000):
+			self.lr = learning_rate
+			self.n_iters = n_iters
+			self.weights = None
+			self.bias = None
+
+		def fit(self, X, y):
+			n_samples, n_features = X.shape
+			self.weights = np.zeros(n_features)
+			self.bias = 0
+
+			for _ in range(self.n_iters):
+				y_pred = np.dot(X, self.weights) + self.bias
+
+				dw = (1 / n_samples) * np.dot(X.T, (y_pred - y))
+				db = (1 / n_samples) * np.sum(y_pred - y)
+
+				self.weights -= self.lr * dw
+				self.bias -= self.lr * db
+
+		def predict(self, X):
+			return np.dot(X, self.weights) + self.bias
+
+
+	X = np.array([[1], [2], [3], [4], [5]])  # Feature
+	y = np.array([2, 4, 6, 8, 10])           # Target
+
+	model = LinearRegressionGD(learning_rate=0.01, n_iters=1000)
+	model.fit(X, y)
+
+	pred = model.predict(np.array([[6]]))
+	print("Predicted value for input 6:", pred)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. House Price Prediction (Regression) Predict house prices based on factors like square footage, number of rooms, and location.
+Ans.
+	import numpy as np
+	import pandas as pd
+	from sklearn.model_selection import train_test_split
+	from sklearn.linear_model import LinearRegression
+	from sklearn.preprocessing import LabelEncoder
+
+	data = {
+		"SquareFeet": [1000, 1500, 2000, 2500, 1800, 1200, 2200, 3000],
+		"Rooms":      [2,    3,    3,    4,    3,    2,    4,    5],
+		"Location":   ["City", "Suburb", "City", "City", "Suburb", "Village", "City", "Suburb"],
+		"Price":      [200000, 280000, 340000, 420000, 300000, 180000, 380000, 500000]
+	}
+
+	df = pd.DataFrame(data)
+
+	encoder = LabelEncoder()
+	df["LocationEncoded"] = encoder.fit_transform(df["Location"])
+
+	X = df[["SquareFeet", "Rooms", "LocationEncoded"]]
+	y = df["Price"]
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		X, y, test_size=0.2, random_state=42
+	)
+
+	model = LinearRegression()
+	model.fit(X_train, y_train)
+
+	predictions = model.predict(X_test)
+
+	print("=== Actual Prices ===")
+	print(y_test.values)
+
+	print("\n=== Predicted Prices ===")
+	print(np.round(predictions, 2))
+
+	new_house = np.array([[2100, 3, encoder.transform(["City"])[0]]])
+	pred_price = model.predict(new_house)
+	print("\nPredicted price for new house:", np.round(pred_price[0], 2))
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Spam Email Detection (Classification) Classify emails as spam or not based on their content and metadata.
+Ans.
+	import pandas as pd
+	from sklearn.model_selection import train_test_split
+	from sklearn.feature_extraction.text import TfidfVectorizer
+	from sklearn.linear_model import LogisticRegression
+	from sklearn.metrics import accuracy_score, classification_report
+
+	data = {
+		"email": [
+			"Congratulations! You have won a prize. Click here to claim now!",
+			"Dear user, your account has been updated successfully.",
+			"Limited time offer! Buy now and save 70%",
+			"Reminder: Meeting at 3 PM with the project team.",
+			"You have been selected for a free lottery entry!",
+			"Please find the attached report for this week.",
+			"Get cheap medicines without prescription!",
+			"Lunch tomorrow? Let me know your availability."
+		],
+		"label": ["spam", "ham", "spam", "ham", "spam", "ham", "spam", "ham"]
+	}
+
+	df = pd.DataFrame(data)
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		df["email"], df["label"], test_size=0.25, random_state=42
+	)
+
+	vectorizer = TfidfVectorizer(stop_words="english")
+	X_train_vec = vectorizer.fit_transform(X_train)
+	X_test_vec = vectorizer.transform(X_test)
+
+	model = LogisticRegression()
+	model.fit(X_train_vec, y_train)
+
+	predictions = model.predict(X_test_vec)
+
+	print("=== Actual Labels ===")
+	print(y_test.values)
+
+	print("\n=== Predicted Labels ===")
+	print(predictions)
+
+	print("\nAccuracy:", accuracy_score(y_test, predictions))
+	print("\nClassification Report:")
+	print(classification_report(y_test, predictions))
+
+	new_email = ["Free vacation offer! Claim your ticket now."]
+	new_email_vec = vectorizer.transform(new_email)
+	print("\nPrediction for new email:", model.predict(new_email_vec)[0])
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Customer Segmentation (Clustering) Group customers into segments based on purchasing behavior and demographics.
+Ans.
+	import numpy as np
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	from sklearn.cluster import KMeans
+
+	data = {
+		"Age": [25, 45, 33, 52, 23, 40, 60, 48, 33, 29, 51, 22],
+		"AnnualIncome": [50000, 90000, 60000, 120000, 45000, 75000, 130000, 95000, 62000, 54000, 110000, 40000],
+		"SpendingScore": [65, 40, 75, 30, 80, 55, 25, 42, 70, 60, 33, 85]
+	}
+
+	df = pd.DataFrame(data)
+
+	X = df[["Age", "AnnualIncome", "SpendingScore"]]
+
+	kmeans = KMeans(n_clusters=3, random_state=42)
+	df["Cluster"] = kmeans.fit_predict(X)
+
+	print(df)
+
+	plt.scatter(df["Age"], df["SpendingScore"], c=df["Cluster"], cmap="viridis")
+	plt.xlabel("Age")
+	plt.ylabel("Spending Score")
+	plt.title("Customer Segmentation using K-Means")
+	plt.show()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Stock Price Prediction (Time Series Forecasting) Predict future stock prices using historical market data.
+Ans.
+	import pandas as pd
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from sklearn.linear_model import LinearRegression
+	from sklearn.model_selection import train_test_split
+
+	data = {
+		"Date": pd.date_range(start="2023-01-01", periods=10, freq="D"),
+		"Close": [100, 102, 101, 105, 107, 110, 108, 112, 115, 117]
+	}
+
+	df = pd.DataFrame(data)
+
+	df["PrevClose"] = df["Close"].shift(1)
+	df = df.dropna()
+
+	X = df[["PrevClose"]].values
+	y = df["Close"].values
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+
+	model = LinearRegression()
+	model.fit(X_train, y_train)
+
+	predictions = model.predict(X_test)
+
+	print("Actual Prices:", y_test)
+	print("Predicted Prices:", np.round(predictions, 2))
+
+	last_price = df["Close"].iloc[-1]
+	next_day_price = model.predict([[last_price]])
+	print("Predicted next day's price:", np.round(next_day_price[0], 2))
+
+
+	plt.plot(df["Date"].iloc[-len(y_test):], y_test, label="Actual Prices", marker='o')
+	plt.plot(df["Date"].iloc[-len(y_test):], predictions, label="Predicted Prices", marker='x')
+	plt.xlabel("Date")
+	plt.ylabel("Closing Price")
+	plt.title("Stock Price Prediction")
+	plt.legend()
+	plt.show()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Medical Diagnosis (Classification) Predict whether a patient has a disease based on medical test results.
+Ans.
+	import pandas as pd
+	from sklearn.model_selection import train_test_split
+	from sklearn.linear_model import LogisticRegression
+	from sklearn.metrics import accuracy_score, classification_report
+
+	data = {
+		"Age": [25, 45, 33, 52, 23, 40, 60, 48],
+		"BloodPressure": [120, 140, 130, 150, 115, 135, 160, 145],
+		"Cholesterol": [180, 220, 200, 240, 170, 210, 250, 230],
+		"HasDisease": [0, 1, 0, 1, 0, 1, 1, 1]  # 0 = No, 1 = Yes
+	}
+
+	df = pd.DataFrame(data)
+
+	X = df[["Age", "BloodPressure", "Cholesterol"]]
+	y = df["HasDisease"]
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		X, y, test_size=0.25, random_state=42
+	)
+
+	model = LogisticRegression()
+	model.fit(X_train, y_train)
+
+	predictions = model.predict(X_test)
+
+	print("=== Actual Labels ===")
+	print(y_test.values)
+
+	print("\n=== Predicted Labels ===")
+	print(predictions)
+
+	print("\nAccuracy:", accuracy_score(y_test, predictions))
+	print("\nClassification Report:")
+	print(classification_report(y_test, predictions))
+
+	new_patient = pd.DataFrame({"Age":[50], "BloodPressure":[155], "Cholesterol":[235]})
+	new_pred = model.predict(new_patient)
+	print("\nPrediction for new patient (1 = Disease, 0 = No Disease):", new_pred[0])
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Implement Support Vector Machine (SVM)-A classification algorithm that finds an optimal hyperplane for separating different classes.
+Ans.
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from sklearn import datasets
+	from sklearn.model_selection import train_test_split
+	from sklearn.svm import SVC
+	from sklearn.metrics import accuracy_score, classification_report
+
+	iris = datasets.load_iris()
+	X = iris.data[:100, :2]  # Only first 100 samples and first 2 features
+	y = iris.target[:100]    # Classes 0 and 1
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		X, y, test_size=0.2, random_state=42
+	)
+
+	svm_model = SVC(kernel='linear')  # Linear kernel for optimal hyperplane
+	svm_model.fit(X_train, y_train)
+
+	y_pred = svm_model.predict(X_test)
+
+	print("=== Actual Labels ===")
+	print(y_test)
+
+	print("\n=== Predicted Labels ===")
+	print(y_pred)
+
+	print("\nAccuracy:", accuracy_score(y_test, y_pred))
+	print("\nClassification Report:")
+	print(classification_report(y_test, y_pred))
+
+	def plot_svc(model, X, y):
+		plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm', s=50, edgecolors='k')
+
+		ax = plt.gca()
+		xlim = ax.get_xlim()
+		ylim = ax.get_ylim()
+
+		xx = np.linspace(xlim[0], xlim[1], 30)
+		yy = np.linspace(ylim[0], ylim[1], 30)
+		YY, XX = np.meshgrid(yy, xx)
+		xy = np.vstack([XX.ravel(), YY.ravel()]).T
+		Z = model.decision_function(xy).reshape(XX.shape)
+
+		ax.contour(XX, YY, Z, colors='k', levels=[0], alpha=0.5, linestyles=['-'])
+		ax.contour(XX, YY, Z, colors='k', levels=[-1, 1], alpha=0.5, linestyles=['--'])
+
+		plt.xlabel('Feature 1')
+		plt.ylabel('Feature 2')
+		plt.title('SVM Decision Boundary')
+		plt.show()
+
+	plot_svc(svm_model, X, y)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Implement Convolutional Neural Network (CNN)-A neural network designed for image classification and recognition.
+Ans.
+	import tensorflow as tf
+	from tensorflow.keras import datasets, layers, models
+	from tensorflow.keras.utils import to_categorical
+	import matplotlib.pyplot as plt
+
+	(X_train, y_train), (X_test, y_test) = datasets.mnist.load_data()
+
+	X_train = X_train.reshape((X_train.shape[0], 28, 28, 1)).astype('float32') / 255.0
+	X_test = X_test.reshape((X_test.shape[0], 28, 28, 1)).astype('float32') / 255.0
+
+	y_train = to_categorical(y_train, 10)
+	y_test = to_categorical(y_test, 10)
+
+	model = models.Sequential()
+	model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+	model.add(layers.MaxPooling2D((2, 2)))
+	model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+	model.add(layers.MaxPooling2D((2, 2)))
+	model.add(layers.Flatten())
+	model.add(layers.Dense(64, activation='relu'))
+	model.add(layers.Dense(10, activation='softmax'))
+
+
+	model.compile(optimizer='adam',
+				  loss='categorical_crossentropy',
+				  metrics=['accuracy'])
+
+
+	history = model.fit(X_train, y_train, epochs=5, batch_size=64,
+						validation_data=(X_test, y_test))
+
+	test_loss, test_acc = model.evaluate(X_test, y_test)
+	print("\nTest Accuracy:", test_acc)
+
+	plt.plot(history.history['accuracy'], label='train accuracy')
+	plt.plot(history.history['val_accuracy'], label='val accuracy')
+	plt.xlabel('Epoch')
+	plt.ylabel('Accuracy')
+	plt.title('CNN Training Accuracy')
+	plt.legend()
+	plt.show()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Implement LSTM (Long Short-Term Memory) - A type of RNN used for time-series forecasting and text generation.
+Ans.
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import LSTM, Dense
+	from sklearn.preprocessing import MinMaxScaler
+
+	data = np.array([100, 102, 101, 105, 107, 110, 108, 112, 115, 117], dtype=float)
+	data = data.reshape(-1, 1)
+
+	scaler = MinMaxScaler(feature_range=(0, 1))
+	data_scaled = scaler.fit_transform(data)
+
+	def create_sequences(data, time_step=3):
+		X, y = [], []
+		for i in range(len(data)-time_step):
+			X.append(data[i:i+time_step])
+			y.append(data[i+time_step])
+		return np.array(X), np.array(y)
+
+	time_step = 3
+	X, y = create_sequences(data_scaled, time_step)
+
+	X = X.reshape(X.shape[0], X.shape[1], 1)
+
+	model = Sequential()
+	model.add(LSTM(50, activation='relu', input_shape=(time_step, 1)))
+	model.add(Dense(1))
+	model.compile(optimizer='adam', loss='mse')
+
+	model.fit(X, y, epochs=200, verbose=0)
+
+	last_sequence = data_scaled[-time_step:].reshape(1, time_step, 1)
+	predicted_scaled = model.predict(last_sequence)
+	predicted = scaler.inverse_transform(predicted_scaled)
+	print("Predicted next value:", predicted[0][0])
+
+	plt.plot(range(len(data)), data, marker='o', label='Actual Data')
+	plt.plot(len(data), predicted[0][0], marker='x', color='red', label='Predicted Next Value')
+	plt.xlabel('Time Step')
+	plt.ylabel('Value')
+	plt.title('LSTM Time Series Forecasting')
+	plt.legend()
+	plt.show()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Implement Reinforcement Learning with Q-Learning-A learning approach where an agent learns optimal actions through rewards and penalties.
+Ans.
+	import numpy as np
+	import random
+
+	n_states = 16
+	n_actions = 4
+
+	Q = np.zeros((n_states, n_actions))
+
+	rewards = np.full((n_states, n_actions), -1)  # default penalty
+
+	rewards[14, 1] = 1  # From state 14, moving right reaches goal (state 15)
+
+	def next_state(state, action):
+		row = state // 4
+		col = state % 4
+		if action == 0 and row > 0:    # Up
+			return state - 4
+		elif action == 1 and col < 3:  # Right
+			return state + 1
+		elif action == 2 and row < 3:  # Down
+			return state + 4
+		elif action == 3 and col > 0:  # Left
+			return state - 1
+		else:
+			return state  # Invalid move, stay in same state
+
+	alpha = 0.1       # Learning rate
+	gamma = 0.9       # Discount factor
+	epsilon = 0.2     # Exploration rate
+	episodes = 500
+
+	for ep in range(episodes):
+		state = 0  # Start state
+		done = False
+		
+		while not done:
+			if random.uniform(0, 1) < epsilon:
+				action = random.randint(0, n_actions-1)
+			else:
+				action = np.argmax(Q[state])
+			
+			new_state = next_state(state, action)
+			reward = rewards[state, action]
+			
+			Q[state, action] = Q[state, action] + alpha * (reward + gamma * np.max(Q[new_state]) - Q[state, action])
+			
+			state = new_state
+			
+			if state == 15:
+				done = True
+
+	print("Learned Q-table:")
+	print(np.round(Q, 2))
+
+	state = 0
+	path = [state]
+	while state != 15:
+		action = np.argmax(Q[state])
+		state = next_state(state, action)
+		path.append(state)
+
+	print("\nOptimal Path from start to goal:", path)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Implement AutoML with TPOT-A program that automates machine learning model selection and hyperparameter tuning.
+Ans.
+	import pandas as pd
+	from sklearn.datasets import load_iris
+	from sklearn.model_selection import train_test_split
+	from tpot import TPOTClassifier
+	from sklearn.metrics import accuracy_score, classification_report
+
+	iris = load_iris()
+	X = iris.data
+	y = iris.target
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		X, y, test_size=0.2, random_state=42
+	)
+
+	tpot = TPOTClassifier(
+		generations=5,       # Number of iterations for pipeline optimization
+		population_size=20,  # Number of pipelines per generation
+		verbosity=2,         # Print progress
+		random_state=42,
+		max_time_mins=2      # Optional: limit execution time
+	)
+
+	tpot.fit(X_train, y_train)
+
+	y_pred = tpot.predict(X_test)
+
+	print("\nAccuracy:", accuracy_score(y_test, y_pred))
+	print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+	tpot.export('best_pipeline.py')
+	print("\nBest pipeline exported to 'best_pipeline.py'")
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Print 149 16 25 using Class and Object.
+Ans.
+	class NumberPrinter:
+		def __init__(self, numbers):
+			self.numbers = numbers
+
+		def display_numbers(self):
+			for num in self.numbers:
+				print(num, end=" ")
+
+	numbers = [149, 16, 25]
+	printer = NumberPrinter(numbers)
+	printer.display_numbers()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Demostrate the usage of Inheritance in Python.
+Ans.
+	class Vehicle:
+		def __init__(self, brand, model):
+			self.brand = brand
+			self.model = model
+
+		def display_info(self):
+			print(f"Brand: {self.brand}, Model: {self.model}")
+
+
+	class Car(Vehicle):
+		def __init__(self, brand, model, doors):
+			super().__init__(brand, model)  # Call parent constructor
+			self.doors = doors
+
+		def display_car_info(self):
+			self.display_info()  # Call parent method
+			print(f"Number of doors: {self.doors}")
+
+	my_car = Car("Toyota", "Corolla", 4)
+	my_car.display_car_info()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Demostrate the usage of Constructor and Constructor Overloading Python
+Ans. 
+	class Student:
+		def __init__(self, name=None, age=None):
+			if name is not None and age is not None:
+				self.name = name
+				self.age = age
+			elif name is not None:
+				self.name = name
+				self.age = "Not Provided"
+			else:
+				self.name = "Unknown"
+				self.age = "Not Provided"
+
+		def display(self):
+			print(f"Name: {self.name}, Age: {self.age}")
+
+
+	student1 = Student("Alice", 20)     # Both name and age
+	student2 = Student("Bob")           # Only name
+	student3 = Student()                # No arguments
+
+	student1.display()
+	student2.display()
+	student3.display()
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to Demostrate the usage of Function and Function Overloading in Python
+Ans.
+	def greet(name):
+		print(f"Hello, {name}!")
+
+	greet("Alice")
+
+	def add(*args):
+		if len(args) == 2:
+			print("Sum of two numbers:", args[0] + args[1])
+		elif len(args) == 3:
+			print("Sum of three numbers:", args[0] + args[1] + args[2])
+		else:
+			print("Unsupported number of arguments")
+
+	add(5, 10)        # Two arguments
+	add(3, 7, 2)      # Three arguments
+	add(1)            # Unsupported
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to find maximum out of 3 using Class and Object in Python.
+Ans.
+	class MaximumFinder:
+		def __init__(self, a, b, c):
+			self.a = a
+			self.b = b
+			self.c = c
+
+		def find_max(self):
+			if self.a >= self.b and self.a >= self.c:
+				return self.a
+			elif self.b >= self.a and self.b >= self.c:
+				return self.b
+			else:
+				return self.c
+
+	num1 = int(input("Enter first number: "))
+	num2 = int(input("Enter second number: "))
+	num3 = int(input("Enter third number: "))
+
+	max_finder = MaximumFinder(num1, num2, num3)
+
+	maximum = max_finder.find_max()
+	print("The maximum number is:", maximum)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. WAP to implement Naive Bayes Classifier - A probabilistic classifier based on Bayes' Theorem, commonly used for text classification.
+Ans.
+	import pandas as pd
+	from sklearn.model_selection import train_test_split
+	from sklearn.feature_extraction.text import TfidfVectorizer
+	from sklearn.naive_bayes import MultinomialNB
+	from sklearn.metrics import accuracy_score, classification_report
+
+	data = {
+		"text": [
+			"Congratulations! You have won a prize. Click here now!",
+			"Dear user, your account has been updated successfully.",
+			"Limited time offer! Buy now and save 70%",
+			"Reminder: Meeting at 3 PM with the project team.",
+			"You have been selected for a free lottery entry!",
+			"Please find the attached report for this week.",
+			"Get cheap medicines without prescription!",
+			"Lunch tomorrow? Let me know your availability."
+		],
+		"label": ["spam", "ham", "spam", "ham", "spam", "ham", "spam", "ham"]
+	}
+
+	df = pd.DataFrame(data)
+
+	X_train, X_test, y_train, y_test = train_test_split(
+		df["text"], df["label"], test_size=0.25, random_state=42
+	)
+
+	vectorizer = TfidfVectorizer(stop_words="english")
+	X_train_vec = vectorizer.fit_transform(X_train)
+	X_test_vec = vectorizer.transform(X_test)
+
+	model = MultinomialNB()
+	model.fit(X_train_vec, y_train)
+
+	y_pred = model.predict(X_test_vec)
+
+	print("=== Actual Labels ===")
+	print(y_test.values)
+
+	print("\n=== Predicted Labels ===")
+	print(y_pred)
+
+	print("\nAccuracy:", accuracy_score(y_test, y_pred))
+	print("\nClassification Report:")
+	print(classification_report(y_test, y_pred))
+
+	new_text = ["Free vacation offer! Claim your ticket now."]
+	new_vec = vectorizer.transform(new_text)
+	print("\nPrediction for new message:", model.predict(new_vec)[0])
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+14, 19, 22, 29, 30, 36
