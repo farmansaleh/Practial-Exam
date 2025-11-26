@@ -38,3 +38,887 @@ Build an Al model for automatic music generation.
 Develop a deep learning model for detecting fake news.
 Implement a reinforcement learning-based recommendation system.
 Deploy a deep learning model as a web application using Flask or FastAPI.
+
+
+
+
+
+Que. Implement a simple feedforward neural network for binary classification using TensorFlow/Keras.
+Ans.
+	import tensorflow as tf
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import Dense
+	from tensorflow.keras.optimizers import Adam
+	import numpy as np
+
+	X = np.random.rand(1000, 2)
+	y = (X[:, 0] + X[:, 1] > 1).astype(int)
+
+	model = Sequential([
+		Dense(8, activation='relu', input_shape=(2,)),
+		Dense(4, activation='relu'),
+		Dense(1, activation='sigmoid')               
+	])
+
+	model.compile(
+		optimizer=Adam(learning_rate=0.001),
+		loss='binary_crossentropy',
+		metrics=['accuracy']
+	)
+
+	history = model.fit(X, y, epochs=20, batch_size=32, verbose=1)
+
+	loss, acc = model.evaluate(X, y, verbose=0)
+	print(f"Training accuracy: {acc:.4f}")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Train an RNN for sentiment analysis using a movie reviews dataset.
+Ans.
+	import tensorflow as tf
+	from tensorflow.keras.datasets import imdb
+	from tensorflow.keras.preprocessing.sequence import pad_sequences
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import Embedding, LSTM, Dense
+
+	vocab_size = 10000    
+	max_len = 200         
+
+	(X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=vocab_size)
+
+	X_train = pad_sequences(X_train, maxlen=max_len)
+	X_test = pad_sequences(X_test, maxlen=max_len)
+
+	model = Sequential([
+		Embedding(input_dim=vocab_size, output_dim=64, input_length=max_len),
+		LSTM(64),                      
+		Dense(1, activation='sigmoid') 
+	])
+
+	model.compile(
+		loss='binary_crossentropy',
+		optimizer='adam',
+		metrics=['accuracy']
+	)
+
+	history = model.fit(
+		X_train, y_train,
+		epochs=3,
+		batch_size=64,
+		validation_split=0.2
+	)
+
+	loss, acc = model.evaluate(X_test, y_test, verbose=0)
+	print(f"Test accuracy: {acc:.4f}")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Implement sequence-to-sequence models for machine translation using attention mechanisms.
+Ans.
+	import tensorflow as tf
+	from tensorflow.keras.layers import Input, LSTM, Dense, Embedding
+	from tensorflow.keras.models import Model
+
+
+	num_samples = 1000
+	src_timesteps = 10
+	tgt_timesteps = 12
+	src_vocab = 5000
+	tgt_vocab = 6000
+	embed_dim = 64
+	latent_dim = 128
+
+	import numpy as np
+	encoder_input = np.random.randint(1, src_vocab, (num_samples, src_timesteps))
+	decoder_input = np.random.randint(1, tgt_vocab, (num_samples, tgt_timesteps))
+	decoder_target = np.random.randint(1, tgt_vocab, (num_samples, tgt_timesteps))
+
+	class BahdanauAttention(tf.keras.layers.Layer):
+		def __init__(self, units):
+			super().__init__()
+			self.W1 = tf.keras.layers.Dense(units)
+			self.W2 = tf.keras.layers.Dense(units)
+			self.V = tf.keras.layers.Dense(1)
+
+		def call(self, hidden, enc_output):
+			
+			hidden_with_time = tf.expand_dims(hidden, 1)
+			
+			score = self.V(tf.nn.tanh(self.W1(enc_output) + self.W2(hidden_with_time)))
+			attention_weights = tf.nn.softmax(score, axis=1)
+			
+			context_vector = attention_weights * enc_output
+			context_vector = tf.reduce_sum(context_vector, axis=1)
+			
+			return context_vector, attention_weights
+
+	encoder_inputs = Input(shape=(src_timesteps,))
+	enc_embed = Embedding(src_vocab, embed_dim)(encoder_inputs)
+	encoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
+	encoder_output, state_h, state_c = encoder_lstm(enc_embed)
+
+	decoder_inputs = Input(shape=(tgt_timesteps,))
+	dec_embed = Embedding(tgt_vocab, embed_dim)(decoder_inputs)
+
+	decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
+	attention = BahdanauAttention(latent_dim)
+
+	all_outputs = []
+	decoder_state_h, decoder_state_c = state_h, state_c
+
+	for t in range(tgt_timesteps):
+		dec_input_t = tf.expand_dims(dec_embed[:, t, :], 1)
+
+		context_vector, _ = attention(decoder_state_h, encoder_output)
+
+		dec_x = tf.concat([dec_input_t, tf.expand_dims(context_vector, 1)], axis=-1)
+
+		output, decoder_state_h, decoder_state_c = decoder_lstm(
+			dec_x, initial_state=[decoder_state_h, decoder_state_c]
+		)
+
+		dec_dense = Dense(tgt_vocab, activation="softmax")
+		output = dec_dense(output)
+		all_outputs.append(output)
+
+	decoder_outputs = tf.concat(all_outputs, axis=1)
+
+
+	model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+	model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+	model.summary()
+
+	model.fit([encoder_input, decoder_input], decoder_target,
+			  batch_size=32, epochs=5)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Apply reinforcement learning techniques to train an agent for playing a simple game.
+Ans.
+	import gym
+	import numpy as np
+
+	env = gym.make("FrozenLake-v1", is_slippery=True)
+
+	n_states = env.observation_space.n    
+	n_actions = env.action_space.n        
+
+	Q = np.zeros((n_states, n_actions))
+
+	learning_rate = 0.8
+	discount = 0.95
+	episodes = 2000
+	epsilon = 1.0         
+	epsilon_decay = 0.999 
+	epsilon_min = 0.01
+
+	for episode in range(episodes):
+		state, _ = env.reset()
+		done = False
+
+		while not done:
+			if np.random.rand() < epsilon:
+				action = env.action_space.sample()   
+			else:
+				action = np.argmax(Q[state])        
+
+			next_state, reward, terminated, truncated, _ = env.step(action)
+			done = terminated or truncated
+
+			old_value = Q[state, action]
+			next_max = np.max(Q[next_state])
+
+			Q[state, action] = old_value + learning_rate * (
+				reward + discount * next_max - old_value
+			)
+
+			state = next_state
+
+		epsilon = max(epsilon * epsilon_decay, epsilon_min)
+
+	print("Training complete.")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Analyze medical images (e.g., MRI scans) for disease diagnosis using deep learning.
+Ans.
+	import tensorflow as tf
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
+	from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+	img_size = 128
+	batch_size = 16
+
+	datagen = ImageDataGenerator(rescale=1.0/255.0)
+
+	train_data = datagen.flow_from_directory(
+		"data/train",
+		target_size=(img_size, img_size),
+		batch_size=batch_size,
+		class_mode='binary'
+	)
+
+	val_data = datagen.flow_from_directory(
+		"data/val",
+		target_size=(img_size, img_size),
+		batch_size=batch_size,
+		class_mode='binary'
+	)
+
+	model = Sequential([
+		Conv2D(32, (3,3), activation='relu', input_shape=(img_size, img_size, 3)),
+		MaxPooling2D(),
+
+		Conv2D(64, (3,3), activation='relu'),
+		MaxPooling2D(),
+
+		Conv2D(128, (3,3), activation='relu'),
+		MaxPooling2D(),
+
+		Flatten(),
+		Dense(128, activation='relu'),
+		Dropout(0.3),
+		Dense(1, activation='sigmoid')   
+	])
+
+	model.compile(optimizer='adam',
+				  loss='binary_crossentropy',
+				  metrics=['accuracy'])
+
+	model.summary()
+
+	history = model.fit(
+		train_data,
+		validation_data=val_data,
+		epochs=10
+	)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Train a deep learning model for time series forecasting.
+Ans.
+1. Prepare the Data
+	import numpy as np
+
+	time = np.arange(0, 200, 0.1)
+	series = np.sin(time) + 0.1 * np.random.randn(len(time))
+
+	def create_dataset(data, window=20):
+		X, y = [], []
+		for i in range(len(data) - window):
+			X.append(data[i:i+window])
+			y.append(data[i+window])
+		return np.array(X), np.array(y)
+
+	window_size = 20
+	X, y = create_dataset(series, window_size)
+
+	X = X.reshape((X.shape[0], X.shape[1], 1))
+	
+2. Build the LSTM Model
+	import tensorflow as tf
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import LSTM, Dense
+
+	model = Sequential([
+		LSTM(64, return_sequences=False, input_shape=(window_size, 1)),
+		Dense(32, activation='relu'),
+		Dense(1)     # predict next value
+	])
+
+	model.compile(optimizer='adam', loss='mse')
+	model.summary()
+
+3. Train the Model
+	history = model.fit(
+		X, y,
+		epochs=20,
+		batch_size=32,
+		validation_split=0.2
+	)
+
+4. Make Predictions
+	last_window = series[-window_size:].reshape(1, window_size, 1)
+	prediction = model.predict(last_window)
+	print("Next value prediction:", prediction[0][0])
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Develop an object detection model using YOLO or Faster R-CNN.
+Ans.
+Object Detection Using Faster R-CNN (TensorFlow/Keras)
+Step 1 — Install TF Object Detection API
+	pip install tensorflow
+	pip install object-detection
+
+Step 2 — Load a Pretrained Faster R-CNN
+	import tensorflow as tf
+	import tensorflow_hub as hub
+
+	model = hub.load(
+		"https://tfhub.dev/tensorflow/faster_rcnn/resnet50_v1_640x640/1"
+	)
+
+Step 3 — Run Inference
+	import numpy as np
+	import cv2
+
+	img = cv2.imread("test.jpg")
+	img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	img_tensor = tf.convert_to_tensor(img_rgb, dtype=tf.uint8)[tf.newaxis, ...]
+
+	output = model(img_tensor)
+	boxes = output["detection_boxes"]
+	scores = output["detection_scores"]
+	classes = output["detection_classes"]
+
+	print(scores[0][:5])
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Perform hyperparameter tuning on a deep learning model using Keras Tuner.
+Ans.
+1. Install Keras Tuner
+	pip install keras-tuner
+	
+2. Build a Hypermodel
+	import keras_tuner as kt
+	import tensorflow as tf
+	from tensorflow.keras import layers, models
+
+	def build_model(hp):
+		model = models.Sequential()
+
+		hp_units = hp.Int('units', min_value=32, max_value=256, step=32)
+		model.add(layers.Dense(units=hp_units, activation='relu', input_shape=(784,)))
+
+		for i in range(hp.Int("num_layers", 1, 3)):
+			model.add(layers.Dense(
+				hp.Int(f"layer_{i}_units", 32, 256, step=32),
+				activation='relu'
+			))
+
+		model.add(layers.Dense(10, activation='softmax'))
+
+		hp_learning_rate = hp.Choice('lr', values=[1e-2, 1e-3, 1e-4])
+
+		model.compile(
+			optimizer=tf.keras.optimizers.Adam(learning_rate=hp_learning_rate),
+			loss='sparse_categorical_crossentropy',
+			metrics=['accuracy']
+		)
+
+		return model
+
+3. Load Dataset
+	mnist = tf.keras.datasets.mnist
+	(x_train, y_train), (x_val, y_val) = mnist.load_data()
+
+	x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
+	x_val = x_val.reshape(-1, 784).astype("float32") / 255.0
+	
+4. Create the Tuner
+	tuner = kt.RandomSearch(
+		build_model,
+		objective='val_accuracy',
+		max_trials=10,           
+		executions_per_trial=1,  
+		directory='tuner_dir',
+		project_name='mnist_tuning'
+	)
+
+5. Run the Hyperparameter Search
+	tuner.search(
+		x_train, y_train,
+		epochs=5,
+		validation_data=(x_val, y_val)
+	)
+	
+6. Get the Best Model and Hyperparameters
+	best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+
+	print("Best number of units:", best_hps.get('units'))
+	print("Best learning rate:", best_hps.get('lr'))
+
+	best_model = tuner.get_best_models(num_models=1)[0]
+	loss, acc = best_model.evaluate(x_val, y_val)
+	print("Validation accuracy of best model:", acc)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Develop a speech recognition system using deep learning techniques.
+Ans.
+import torch
+import torchaudio
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
+from torchaudio.datasets import LIBRISPEECH
+
+train_dataset = LIBRISPEECH("./data", url="train-clean-100", download=True)
+test_dataset = LIBRISPEECH("./data", url="test-clean", download=True)
+
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=lambda x: x)
+test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False, collate_fn=lambda x: x)
+
+mfcc_transform = torchaudio.transforms.MFCC(
+    sample_rate=16000, n_mfcc=40, log_mels=True
+)
+
+def extract_features(batch):
+    features = []
+    transcripts = []
+    for waveform, sample_rate, transcript, *_ in batch:
+        mfcc = mfcc_transform(waveform).squeeze(0).transpose(0, 1)  # Shape: [time, n_mfcc]
+        features.append(mfcc)
+        transcripts.append(transcript.lower())
+    return features, transcripts
+	
+class SpeechRecognitionModel(nn.Module):
+    def __init__(self, input_dim=40, hidden_dim=128, output_dim=29, num_layers=2):
+        super().__init__()
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=num_layers, batch_first=True, bidirectional=True)
+        self.fc = nn.Linear(hidden_dim*2, output_dim)  # bidirectional -> hidden_dim*2
+
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.fc(x)
+        return x
+		
+model = SpeechRecognitionModel()
+ctc_loss = nn.CTCLoss(blank=28)  # blank token index
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Perform data augmentation techniques to enhance a dataset for deep learning.
+Ans.
+1. Image Data Augmentation (Using PyTorch / torchvision)
+	from torchvision import transforms
+	from PIL import Image
+
+	transform = transforms.Compose([
+		transforms.RandomHorizontalFlip(),      
+		transforms.RandomRotation(15),          
+		transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),  
+		transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+		transforms.ToTensor()
+	])
+
+	img = Image.open("sample.jpg")
+	augmented_img = transform(img)
+	
+2. Text Data Augmentation
+	from nlpaug.augmenter.word import SynonymAug
+
+	text = "Deep learning improves model performance"
+	aug = SynonymAug(aug_src='wordnet')
+	augmented_text = aug.augment(text)
+	
+3. Audio Data Augmentation
+	import torchaudio
+	import torch
+
+	waveform, sr = torchaudio.load("sample.wav")
+
+	noise = 0.005 * torch.randn_like(waveform)
+	waveform_noisy = waveform + noise
+
+	time_stretch = torchaudio.transforms.TimeStretch()
+	waveform_stretched = time_stretch(waveform)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Implement a deep reinforcement learning model for a robotic control task.
+Ans.
+	import gym
+	import torch
+	import torch.nn as nn
+	import torch.optim as optim
+	import numpy as np
+
+	env = gym.make('Pendulum-v1')  # Example: continuous control
+	state_dim = env.observation_space.shape[0]
+	action_dim = env.action_space.shape[0]
+	action_bound = env.action_space.high[0]
+
+	class Actor(nn.Module):
+		def __init__(self, state_dim, action_dim, action_bound):
+			super().__init__()
+			self.fc = nn.Sequential(
+				nn.Linear(state_dim, 128),
+				nn.ReLU(),
+				nn.Linear(128, 128),
+				nn.ReLU(),
+				nn.Linear(128, action_dim),
+				nn.Tanh()
+			)
+			self.action_bound = action_bound
+
+		def forward(self, state):
+			return self.fc(state) * self.action_bound
+
+	class Critic(nn.Module):
+		def __init__(self, state_dim, action_dim):
+			super().__init__()
+			self.fc = nn.Sequential(
+				nn.Linear(state_dim + action_dim, 128),
+				nn.ReLU(),
+				nn.Linear(128, 128),
+				nn.ReLU(),
+				nn.Linear(128, 1)
+			)
+
+		def forward(self, state, action):
+			x = torch.cat([state, action], dim=-1)
+			return self.fc(x)
+			
+Replay Buffer
+	from collections import deque
+	import random
+
+	class ReplayBuffer:
+		def __init__(self, max_size=10000):
+			self.buffer = deque(maxlen=max_size)
+
+		def push(self, state, action, reward, next_state, done):
+			self.buffer.append((state, action, reward, next_state, done))
+
+		def sample(self, batch_size):
+			batch = random.sample(self.buffer, batch_size)
+			states, actions, rewards, next_states, dones = zip(*batch)
+			return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(dones)
+
+	buffer = ReplayBuffer()
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Build a generative model for text generation.
+Ans.
+Load Text Data
+	with open("input.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+	
+Step 2: Character-level Tokenization
+	import numpy as np
+	from tensorflow.keras.preprocessing.text import Tokenizer
+	from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+	tokenizer = Tokenizer(char_level=True)
+	tokenizer.fit_on_texts([text])
+	total_chars = len(tokenizer.word_index) + 1  
+
+	encoded = tokenizer.texts_to_sequences([text])[0]
+	
+Step 3: Create Input-Output Pairs
+	seq_length = 40
+	X, y = [], []
+
+	for i in range(len(encoded) - seq_length):
+		X.append(encoded[i:i+seq_length])
+		y.append(encoded[i+seq_length])
+
+	X = np.array(X)
+	y = np.array(y)
+
+Training Loop	
+	from tensorflow.keras.models import Sequential
+	from tensorflow.keras.layers import LSTM, Dense, Embedding
+
+	model = Sequential()
+	model.add(Embedding(input_dim=total_chars, output_dim=50, input_length=seq_length))
+	model.add(LSTM(256))
+	model.add(Dense(total_chars, activation='softmax'))
+
+	model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
+	model.summary()
+	
+Text Generation
+	from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+	def generate_text(seed_text, gen_length=200, temperature=1.0):
+		result = seed_text
+		for _ in range(gen_length):
+			encoded_seed = tokenizer.texts_to_sequences([seed_text])[0]
+			encoded_seed = pad_sequences([encoded_seed], maxlen=seq_length)
+			preds = model.predict(encoded_seed, verbose=0)[0]
+			
+			preds = np.log(preds + 1e-8) / temperature
+			exp_preds = np.exp(preds)
+			preds = exp_preds / np.sum(exp_preds)
+			
+			next_index = np.random.choice(range(total_chars), p=preds)
+			next_char = tokenizer.index_word[next_index]
+			
+			result += next_char
+			seed_text = seed_text[1:] + next_char
+		return result
+
+	print(generate_text("Once upon a time, ", gen_length=300, temperature=0.7))
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Implement a siamese neural network for face verification.
+Ans.
+Dataset Preparation
+	import torch
+	from torch.utils.data import Dataset
+	from PIL import Image
+	import random
+	import os
+
+	class SiameseDataset(Dataset):
+		def __init__(self, image_folder, transform=None):
+			self.image_folder = image_folder
+			self.transform = transform
+			self.classes = os.listdir(image_folder)
+			self.image_paths = {cls: [os.path.join(image_folder, cls, img) 
+									  for img in os.listdir(os.path.join(image_folder, cls))] 
+								for cls in self.classes}
+		
+		def __len__(self):
+			return 10000  # or len of generated pairs
+		
+		def __getitem__(self, idx):
+			same = random.randint(0, 1)
+			cls1 = random.choice(self.classes)
+			img1_path = random.choice(self.image_paths[cls1])
+			img1 = Image.open(img1_path).convert('L')
+			
+			if same:
+				img2_path = random.choice(self.image_paths[cls1])
+			else:
+				cls2 = random.choice([c for c in self.classes if c != cls1])
+				img2_path = random.choice(self.image_paths[cls2])
+			img2 = Image.open(img2_path).convert('L')
+			
+			if self.transform:
+				img1 = self.transform(img1)
+				img2 = self.transform(img2)
+			
+			label = torch.tensor([same], dtype=torch.float32)
+			return img1, img2, label
+			
+Siamese Network
+	import torch.nn as nn
+	import torch.nn.functional as F
+
+	class SiameseNetwork(nn.Module):
+		def __init__(self):
+			super(SiameseNetwork, self).__init__()
+			self.cnn = nn.Sequential(
+				nn.Conv2d(1, 32, kernel_size=5),
+				nn.ReLU(),
+				nn.MaxPool2d(2),
+				nn.Conv2d(32, 64, kernel_size=5),
+				nn.ReLU(),
+				nn.MaxPool2d(2)
+			)
+			self.fc = nn.Sequential(
+				nn.Linear(64*53*53, 256),  # adjust based on image size
+				nn.ReLU(),
+				nn.Linear(256, 128)
+			)
+		
+		def forward_one(self, x):
+			x = self.cnn(x)
+			x = x.view(x.size(0), -1)
+			x = self.fc(x)
+			return x
+		
+		def forward(self, x1, x2):
+			out1 = self.forward_one(x1)
+			out2 = self.forward_one(x2)
+			return out1, out2
+
+Training Loop
+	import torch.optim as optim
+
+	model = SiameseNetwork()
+	criterion = ContrastiveLoss()
+	optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+	for epoch in range(20):
+		for img1, img2, label in dataloader:
+			optimizer.zero_grad()
+			out1, out2 = model(img1, img2)
+			loss = criterion(out1, out2, label)
+			loss.backward()
+			optimizer.step()
+		print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+
+Face Verification
+	def verify(model, img1, img2, threshold=1.0):
+		model.eval()
+		out1, out2 = model(img1.unsqueeze(0), img2.unsqueeze(0))
+		distance = F.pairwise_distance(out1, out2)
+		return distance.item() < threshold
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Train a segmentation model for medical imaging applications.
+Ans.
+Dataset Preparation
+	import torch
+	from torch.utils.data import Dataset
+	from PIL import Image
+	import os
+
+	class MedicalDataset(Dataset):
+		def __init__(self, image_folder, mask_folder, transform=None):
+			self.image_folder = image_folder
+			self.mask_folder = mask_folder
+			self.image_names = os.listdir(image_folder)
+			self.transform = transform
+
+		def __len__(self):
+			return len(self.image_names)
+		
+		def __getitem__(self, idx):
+			img_path = os.path.join(self.image_folder, self.image_names[idx])
+			mask_path = os.path.join(self.mask_folder, self.image_names[idx])
+			
+			image = Image.open(img_path).convert('L')  # grayscale
+			mask = Image.open(mask_path).convert('L')  # binary mask
+			
+			if self.transform:
+				image = self.transform(image)
+				mask = self.transform(mask)
+			
+			return image, mask
+
+U-Net Architecture
+	import torch.nn as nn
+	import torch.nn.functional as F
+
+	class UNet(nn.Module):
+		def __init__(self, in_channels=1, out_channels=1):
+			super(UNet, self).__init__()
+			
+			def CBR(in_ch, out_ch):
+				return nn.Sequential(
+					nn.Conv2d(in_ch, out_ch, 3, padding=1),
+					nn.BatchNorm2d(out_ch),
+					nn.ReLU(inplace=True)
+				)
+			
+			self.enc1 = CBR(in_channels, 64)
+			self.enc2 = CBR(64, 128)
+			self.enc3 = CBR(128, 256)
+			self.enc4 = CBR(256, 512)
+			
+			self.pool = nn.MaxPool2d(2)
+			
+			self.up3 = nn.ConvTranspose2d(512, 256, 2, stride=2)
+			self.dec3 = CBR(512, 256)
+			self.up2 = nn.ConvTranspose2d(256, 128, 2, stride=2)
+			self.dec2 = CBR(256, 128)
+			self.up1 = nn.ConvTranspose2d(128, 64, 2, stride=2)
+			self.dec1 = CBR(128, 64)
+			
+			self.final = nn.Conv2d(64, out_channels, 1)
+		
+		def forward(self, x):
+			# Encoder
+			e1 = self.enc1(x)
+			e2 = self.enc2(self.pool(e1))
+			e3 = self.enc3(self.pool(e2))
+			e4 = self.enc4(self.pool(e3))
+			
+			# Decoder
+			d3 = self.up3(e4)
+			d3 = self.dec3(torch.cat([d3, e3], dim=1))
+			d2 = self.up2(d3)
+			d2 = self.dec2(torch.cat([d2, e2], dim=1))
+			d1 = self.up1(d2)
+			d1 = self.dec1(torch.cat([d1, e1], dim=1))
+			
+			out = self.final(d1)
+			return torch.sigmoid(out)  # for binary segmentation
+
+Training
+	import torch.optim as optim
+	from torch.utils.data import DataLoader
+
+	dataset = MedicalDataset("images/", "masks/", transform=None)
+	dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+
+	model = UNet()
+	criterion = DiceLoss()
+	optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+	for epoch in range(20):
+		model.train()
+		epoch_loss = 0
+		for images, masks in dataloader:
+			optimizer.zero_grad()
+			outputs = model(images)
+			loss = criterion(outputs, masks)
+			loss.backward()
+			optimizer.step()
+			epoch_loss += loss.item()
+		print(f"Epoch {epoch+1}, Loss: {epoch_loss/len(dataloader):.4f}")
+
+Evaluation
+	model.eval()
+	with torch.no_grad():
+		pred_mask = model(test_image.unsqueeze(0))
+		pred_mask = (pred_mask > 0.5).float()
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Que. Develop a speech-to-text system using deep learning.
+Ans.
+Data Preparation
+	import torchaudio
+	import torch
+
+	waveform, sample_rate = torchaudio.load("sample.wav")
+
+	transform = torchaudio.transforms.MelSpectrogram(
+		sample_rate=sample_rate, n_mels=128
+	)
+	mel_spec = transform(waveform)
+	log_mel_spec = torch.log1p(mel_spec)
+
+	Encode transcript:
+	vocab = list("abcdefghijklmnopqrstuvwxyz '")
+	char2idx = {c:i for i,c in enumerate(vocab)}
+	idx2char = {i:c for c,i in char2idx.items()}
+
+	def encode(text):
+		return torch.tensor([char2idx[c] for c in text.lower() if c in char2idx])
+		
+Model
+	import torch.nn as nn
+	import torch.nn.functional as F
+
+	class SpeechRecognitionModel(nn.Module):
+		def __init__(self, input_dim=128, hidden_dim=256, vocab_size=len(vocab), num_layers=3):
+			super().__init__()
+			self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers=num_layers, 
+								batch_first=True, bidirectional=True)
+			self.fc = nn.Linear(hidden_dim*2, vocab_size)  # bidirectional
+		
+		def forward(self, x):
+			out, _ = self.lstm(x)
+			out = self.fc(out)
+			return out  # logits
+
+Training
+	import torch.optim as optim
+
+	optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+	for epoch in range(20):
+		for audio, transcript in dataloader:
+			features = transform(audio)
+			log_mel_spec = torch.log1p(features)
+			
+			logits = model(log_mel_spec)
+			log_probs = F.log_softmax(logits, dim=-1).transpose(0,1)
+			target = encode(transcript)
+			
+			loss = ctc_loss(log_probs, target.unsqueeze(0),
+							input_lengths=torch.tensor([log_probs.size(0)]),
+							target_lengths=torch.tensor([len(target)]))
+			
+			optimizer.zero_grad()
+			loss.backward()
+			optimizer.step()
+		
+		print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+
+Decoding
+	def greedy_decode(logits):
+		pred_ids = torch.argmax(logits, dim=-1)
+		pred_chars = [idx2char[i.item()] for i in pred_ids]
+		return ''.join(pred_chars).replace(' ', '')
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
